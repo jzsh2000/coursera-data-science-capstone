@@ -49,11 +49,17 @@ count.word <- readLines('bash-output/wc-word.txt')[1:3] %>%
 count.line <- readLines('bash-output/wc-line.txt')[1:3] %>% 
     str_extract('[0-9]+(?= )') %>% 
     as.numeric()
-data_frame(
+
+count.df = data_frame(
     type = corpus_type,
     word = count.word,
     line = count.line
-) %>% 
+)
+knitr::kable(count.df)
+```
+
+```{r}
+count.df %>% 
     gather(key = "metrics", value = "count", -type) %>% 
     ggplot(aes(x = type, y = count / 1e6, fill = metrics)) +
         geom_bar(stat = 'identity', position = 'dodge') +
