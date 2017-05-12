@@ -1,3 +1,5 @@
-/final/
-.Rproj.user/
-.Rhistory
+/corpus/
+/.Rhistory
+/.Rproj.user
+*.html
+/rsconnect/

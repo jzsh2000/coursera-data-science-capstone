@@ -1,0 +1,114 @@
+---
+title: "Milestone Report"
+author: "Xiaoyang Jin"
+date: "2017-05-12"
+output:
+    html_document:
+        theme: journal
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(stringr)
+```
+
+## corpus structure
+
+As the following document tree shows, the corpus contain four directories, and each of them represents a kind of language. We will mainly focus on the English corpus in `en_US` directory. The corpus have three sources: blogs, news and twitters.
+```{bash}
+tree corpus/
+```
+
+## data summaries
+Due to the huge file size, some of the data summary work are performed in bash environment to speed up analysing process. Tools used include:
+
+* [GNU coreutils](https://www.gnu.org/software/coreutils/coreutils.html)
+* [GNU parallel](https://www.gnu.org/software/parallel/)
+* [GNU awk](https://www.gnu.org/software/gawk/)
+
+### word count and line count
+As the `wc` command shows, these three files have close number of words. The word counts are between 30 and 40 million.
+```{bash}
+wc -w corpus/en_US/*.txt | tee bash-output/wc-word.txt
+```
+
+Interestingly, when we consider the line count, there is a big difference between these three files. The `twitter.txt` contains more than two times of lines if compared to `blogs.txt` and `news.txt`.
+```{bash}
+wc -l corpus/en_US/*.txt | tee bash-output/wc-line.txt
+```
+
+```{r}
+corpus_type = c('blogs', 'news', 'twitter')
+count.word <- readLines('bash-output/wc-word.txt')[1:3] %>% 
+    str_extract('[0-9]+(?= )') %>% 
+    as.numeric()
+count.line <- readLines('bash-output/wc-line.txt')[1:3] %>% 
+    str_extract('[0-9]+(?= )') %>% 
+    as.numeric()
+data_frame(
+    type = corpus_type,
+    word = count.word,
+    line = count.line
+) %>% 
+    gather(key = "metrics", value = "count", -type) %>% 
+    ggplot(aes(x = type, y = count / 1e6, fill = metrics)) +
+        geom_bar(stat = 'identity', position = 'dodge') +
+        ylab('count (million)') +
+        theme_bw()
+```
+
+### number of words per line
+As we can see, twitters are relatively short, and blogs and news tend to be much longer, as showed in the following plots.
+```{r}
+data_frame(
+    type = corpus_type,
+    word = count.word,
+    line = count.line
+) %>% 
+    mutate(wpl = word / line) %>% 
+    ggplot(aes(x = type, y = wpl)) +
+        geom_bar(stat = 'identity') +
+        ylab('average words per line') +
+        theme_bw()
+```
+
+```{bash}
+ls corpus/en_US/*.txt \
+    | parallel awk \'{print NF}\' {} '>' bash-output/{/.}.wpl.txt
+```
+
+```{r}
+bind_rows(
+    data_frame(
+        type = 'blogs',
+        wpl = as.numeric(readLines('bash-output/en_US.blogs.wpl.txt'))
+    ),
+    data_frame(
+        type = 'news',
+        wpl = as.numeric(readLines('bash-output/en_US.news.wpl.txt'))
+    ),
+    data_frame(
+        type = 'twitter',
+        wpl = as.numeric(readLines('bash-output/en_US.twitter.wpl.txt'))
+    )
+) %>% 
+    ggplot(aes(x = wpl, color = type)) +
+        geom_density() +
+        xlim(c(0, 200)) +
+        xlab('words per line') +
+        theme_bw()
+```
+
+
+## future work
+
+We have a list of work to do before the shiny app is ready:
+
+1. Tokenization of the raw corpus (e.g. `Hello, world!` will be transformed to `Hello , world !`), to take apart the words and punctuation.
+2. Stemming or lemmatization (e.g. `dogs` will be transformed to `dog`), so as to reduce data sparseness.
+3. Train a 3-gram [language model](https://en.wikipedia.org/wiki/Language_model) and using backoff smoothing to handle unseen words and n-grams. The output will be in [ARPA format](http://www.speech.sri.com/projects/srilm/manpages/ngram-format.5.html).
+4. Build the algorithm to find the optimal word using the chain rule of probability theory.
