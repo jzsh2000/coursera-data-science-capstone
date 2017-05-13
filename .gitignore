@@ -1,4 +1,5 @@
 /corpus/
+/.RData
 /.Rhistory
 /.Rproj.user
 *.html
