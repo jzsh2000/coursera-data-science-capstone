@@ -8,6 +8,9 @@ corpus_files = set_names(corpus_files,
                          str_extract(corpus_files, '[^.]*(?=.txt)'))
 
 walk2(corpus_files, names(corpus_files), function(file, source) {
+    if (file.exists(file.path('robj', paste0(source, '.RData')))) {
+        return()
+    }
     cat(paste('=====', source, '=====\n'))
     corpus <- data_frame(text = read_lines(file)) %>%
         mutate(line_num = seq_along(text))
