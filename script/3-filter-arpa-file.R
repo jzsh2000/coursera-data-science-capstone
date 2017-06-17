@@ -18,9 +18,3 @@ model.1 = model.1 %>%
     write_tsv('lm/en.arpa.1.min.txt')
 
 writeLines(sort(model.1$word), 'lm/en.arpa.1.word')
-
-model.2 = read_tsv("lm/en.arpa.2.txt",
-                   col_names = c('pro', 'word', 'back_pro'),
-                   col_types = 'ccc') %>%
-    separate(words, c('word.1', 'word.2'), sep = ' ') %>%
-    filter((word.1 %in% model.1$word) & (word.2 %in% model.1$word))
