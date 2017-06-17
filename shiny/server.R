@@ -8,7 +8,7 @@
 #
 
 library(shiny)
-library(dplyr)
+library(tidyverse)
 library(stringr)
 library(tidytext)
 library(cowsay)
@@ -29,9 +29,9 @@ twitter.word = corpus.word$word[1]
 twitter.2gram = corpus.bigrams %>% select(-n)
 twitter.3gram = corpus.trigrams %>% select(-n)
 
-dat_word = list(blogs = blogs.word,
-                news = news.word,
-                twitter = twitter.word)
+dat_word = list(blogs = ifelse(blogs.word == 'time', 'time ', blogs.word),
+                news = ifelse(news.word == 'time', 'time ', news.word),
+                twitter = ifelse(twitter.word == 'time', 'time ', twitter.word))
 dat_2gram = list(blogs = blogs.2gram,
                 news = news.2gram,
                 twitter = twitter.2gram)
