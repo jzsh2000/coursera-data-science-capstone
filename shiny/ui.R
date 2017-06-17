@@ -23,7 +23,7 @@ shinyUI(fluidPage(
                    width = '100%',
                    placeholder = 'Type your awesome sentence here :)'
                ),
-               verbatimTextOutput('next_word')
+               uiOutput('next_word')
                )
     )
 ))
