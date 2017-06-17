@@ -13,7 +13,7 @@ library(shiny)
 shinyUI(fluidPage(
     title = 'Predict the next word',
 
-    titlePanel('Data Science Capstone Project: Predict the Next Word'),
+    titlePanel('Predict the Next Word'),
     hr(),
     fluidRow(
         column(width = 8, offset = 2,
